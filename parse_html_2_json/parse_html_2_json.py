@@ -35,6 +35,7 @@ def usage():
 	print()
 	print("Simple: ")
 	print("	parse_html_2_json.py -h")
+	print("	parse_html_2_json.py -s test.html")
 	print("	parse_html_2_json.py -s test.html -d test.json")
 	print("------------------- segmentation line --------------------------")
 	print()
@@ -45,7 +46,12 @@ def main():
 	global destination_file
 	global begin_point
 	global end_point
+	cdir = os.getcwd()
+	fdir = os.path.split(sys.argv[0])[0]
 	
+	if cdir != fdir:
+		fdir = cdir
+		
 	if not len(sys.argv[1:]):
 		usage()
 		sys.exit(0)
@@ -72,14 +78,17 @@ def main():
 			sys.exit(0)
 
 	if len(source_file):
-		destination_file = os.path.splitext(destination_file)[0]
+		if not os.path.exists(source_file):
+			source_file = "{0:}/{1:}".format(fdir,os.path.split(source_file)[1])
+			print("\n[++] Try to change source file into '%s'..." % source_file)
+			
 		if not os.path.isfile(source_file):
-			print("\n[x] Need a file,but just path given or file is not exists")
+			print("\n[!!!] Need a file,but just path given or file is not exists")
 			sys.exit(0)
 		if not len(destination_file):
 			print("\n[!] Destination file name is not given,will create the same name of source file")
+		
 		ParseJson(source_file,destination_file)
-		print()
 		print("\n[^_^] Thanks to use!")
 		
 
@@ -87,10 +96,13 @@ def main():
 class ParseJson(object):
 	def __init__(self,source,destination=None):
 		if len(source):
+			self.sourcename = source
 			self.ppath,file = os.path.split(source)
-			self.filename = destination or os.path.splitext(file)[0]
+			self.dpath,dfile = os.path.split(destination)
+			self.dfile = os.path.splitext(dfile)[0] if destination else os.path.splitext(file)[0] 
+			
 			try:
-				buffer = open(source,'r',encoding="utf-8")
+				buffer = open(self.sourcename,'r',encoding="utf-8")
 				# buffer.encode("utf-8")
 				new_buffer = buffer.read()
 				buffer.close()
@@ -152,16 +164,17 @@ class ParseJson(object):
 				self.parseJSON(rsl)
 						
 	def parseJSON(self,dict):
-		if self.ppath:
-			file = "{0:}/{1:}.json".format(self.ppath,self.filename)
-			buffer = open(file,"w+",encoding="utf-8")
+		if self.dpath:
+			file = "{0:}/{1:}.json".format(self.dpath,self.dfile)
 		else:
-			file = "{0:}.json".format(self.filename)
-			buffer = open(file,"w+",encoding="utf-8")
+			if self.ppath:
+				file = "{0:}/{1:}.json".format(self.ppath,self.dfile)
+			else:
+				file = "{0:}.json".format(self.dfile)		
+		buffer = open(file,"w+",encoding="utf-8")
 		json.dump(dict,buffer,ensure_ascii=False)
-		print("\n[==>]Parsed completely from %s.html to %s.json" % (self.filename,self.filename))
-		print()
-		print("[*] Content like :")
+		print("\n[==>]Parsed completely from %s to %s" % (self.sourcename,file))
+		print("\n[*] Content like :")
 		[print("  ",x) for x in dict]
 		buffer.close()
 
