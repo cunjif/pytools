@@ -16,7 +16,6 @@ import bs4
 import json
 import getopt
 from bs4 import BeautifulSoup
-from html5lib import HTMLParser
 
 
 source_file = ""
@@ -27,7 +26,7 @@ def usage():
 	print("parse_html_2_json.py usage :")
 	print()
 	print("Description: \n\
-	read a html file and parse it to json file,also can specify the start point by specify a special feature 'id' in html file byte stream,as same as the end point.")
+	read a html file and parse it into a json file.")
 	print()
 	print()
 	print("	-h --help 				display  usage")	
